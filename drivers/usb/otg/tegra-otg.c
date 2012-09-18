@@ -234,6 +234,13 @@ static void irq_work(struct work_struct *work)
 		dev_info(tegra->otg.dev, "%s --> %s\n", tegra_state_name(from),
 					      tegra_state_name(to));
 
+                if (tegra->charger_cb) {
+		  // tmtmtm: disable charging of OTG slave
+			//tegra->charger_cb(to, from, tegra->charger_cb_data);
+			// tmtmtm: enable vbus in
+  		tegra->detect_vbus = true;
+        }
+
         smb347_deep_sleep = 0;
 		// tmtmtm
 		if (to == OTG_STATE_A_SUSPEND) {
