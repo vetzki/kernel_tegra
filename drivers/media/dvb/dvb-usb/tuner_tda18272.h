@@ -707,8 +707,8 @@ extern "C"
 #endif /* _TMBSL_TDA182I2_INSTANCE_CUSTOM_H */
 
 
-//#endif               
-
+//#endif
+//*/
 
 
 
@@ -923,8 +923,8 @@ extern "C"
 *############################################################
 */
 
-#ifndef TMNXTYPES_H
-#define TMNXTYPES_H
+#ifndef TM_NX_TYPES_H
+#define TM_NX_TYPES_H
 
 //-----------------------------------------------------------------------------
 // Standard include files:
@@ -1057,6 +1057,8 @@ extern "C"
 #else
     typedef Void *pVoid;     // Void (typeless)
 #endif
+
+#if 0 /*added by Realtek 2011-11-24.*/
     /*Assume that 64-bit integers are supported natively by C99 compilers and Visual
     C version 6.00 and higher. More discrimination in this area may be added
     here as necessary.*/
@@ -1099,6 +1101,8 @@ extern "C"
     UInt64, *pUInt64; // 64-bit bitmask
 #endif /*defined __STDC_VERSION__ && __STDC_VERSION__ > 199409L*/
 #endif /*TMFL_DOT_NET_2_0_TYPES*/
+#endif /*added by Realtek 2011-11-24.*/
+
     // Maximum length of device name in all BSP and capability structures
 #define HAL_DEVICE_NAME_LENGTH 16
 
@@ -1107,7 +1111,7 @@ extern "C"
 
     /* timestamp definition */
 #ifndef TMFL_DOT_NET_2_0_TYPES
-    typedef UInt64 tmTimeStamp_t, *ptmTimeStamp_t;
+//    typedef UInt64 tmTimeStamp_t, *ptmTimeStamp_t; /*added by Realtek 2011-11-24.*/
 #endif
     //for backwards compatibility with the older tmTimeStamp_t definition
 #define ticks   lo
@@ -1300,8 +1304,9 @@ UInt32   : 8;
     //
 
 #if        TMFL_OS_IS_CE || TMFL_OS_IS_NT
-// removed to compile without warning with OpenPli
-//#define inline  __inline
+#ifndef inline
+#define inline  __inline
+#endif
 
     //
     // Places shared data in named DLL data segment for WinNT/WinCE builds.
@@ -1522,8 +1527,8 @@ UInt32   : 8;
 //
 //-----------------------------------------------------------------------------
 //
-#ifndef TMCOMPID_H //-------------------
-#define TMCOMPID_H
+#ifndef TM_COMP_ID_H //-------------------
+#define TM_COMP_ID_H
 
 //-----------------------------------------------------------------------------
 // Standard include files:
@@ -2703,6 +2708,8 @@ extern "C" {
 
     
 /* Status of the carrier phase lock loop */
+#ifndef _tmbslFrontEndState_t_Struct_
+#define _tmbslFrontEndState_t_Struct_
 typedef enum _tmbslFrontEndState_t
 {
     /** status Unknown */
@@ -2715,9 +2722,12 @@ typedef enum _tmbslFrontEndState_t
     tmbslFrontEndStateSearching,
     tmbslFrontEndStateMax
 } tmbslFrontEndState_t, *ptmbslFrontEndState_t;
+#endif
 
 
 /* Gpio config */
+#ifndef _tmbslFrontEndGpioConfig_t_Struct_
+#define _tmbslFrontEndGpioConfig_t_Struct_
 typedef enum _tmbslFrontEndGpioConfig_t
 {
     tmbslFrontEndGpioConfUnknown = 0,
@@ -2727,8 +2737,12 @@ typedef enum _tmbslFrontEndGpioConfig_t
     tmbslFrontEndGpioConfTriState,
     tmbslFrontEndGpioConfMax
 } tmbslFrontEndGpioConfig_t, *ptmbslFrontEndGpioConfig_t;
+#endif
+
 
 /* Gpio polarity */
+#ifndef _tmbslFrontEndGpioPolarity_t_Struct_
+#define _tmbslFrontEndGpioPolarity_t_Struct_
 typedef enum _tmbslFrontEndGpioPolarity_t
 {
     tmbslFrontEndGpioPolUnknown = 0,
@@ -2736,8 +2750,12 @@ typedef enum _tmbslFrontEndGpioPolarity_t
     tmbslFrontEndGpioPolInverted,
     tmbslFrontEndGpioPolMax
 } tmbslFrontEndGpioPolarity_t, *ptmbslFrontEndGpioPolarity_t;
+#endif
+
 
 /* IT Selection */
+#ifndef _tmbslFrontEndITSel_t_Struct_
+#define _tmbslFrontEndITSel_t_Struct_
 typedef enum _tmbslFrontEndITSel_t
 {
     tmbslFrontEndITSelUnknown = 0,
@@ -2749,8 +2767,12 @@ typedef enum _tmbslFrontEndITSel_t
     tmbslFrontEndITSelUncor,
     tmbslFrontEndGpioITSelMax
 } tmbslFrontEndITSel_t, *ptmbslFrontEndITSel_t;
+#endif
+
 
 /* I2C switch */
+#ifndef _tmbslFrontEndI2CSwitchState_t_Struct_
+#define _tmbslFrontEndI2CSwitchState_t_Struct_
 typedef enum _tmbslFrontEndI2CSwitchState_t
 {
     tmbslFrontEndI2CSwitchStateUnknown = 0,
@@ -2759,8 +2781,12 @@ typedef enum _tmbslFrontEndI2CSwitchState_t
     tmbslFrontEndI2CSwitchStateReset,
     tmbslFrontEndI2CSwitchStateMax
 } tmbslFrontEndI2CSwitchState_t, *ptmbslFrontEndI2CSwitchState_t;
+#endif
+
 
 /* DVBT2 PLP */
+#ifndef _tmbslFrontEndDVBT2PLP_t_Struct_
+#define _tmbslFrontEndDVBT2PLP_t_Struct_
 typedef struct _tmbslFrontEndDVBT2PLP_t
 {
     UInt32 uId;
@@ -2772,7 +2798,11 @@ typedef struct _tmbslFrontEndDVBT2PLP_t
     tmFrontEndRotationState eRotation;
     tmFrontEndDVBT2FECType_t eFECType;
 } tmbslFrontEndDVBT2PLP_t;
+#endif
 
+
+#ifndef _tmbslFrontEndTVStandard_t_Struct_
+#define _tmbslFrontEndTVStandard_t_Struct_
 typedef enum _tmbslFrontEndTVStandard_t
 {
     tmbslFrontEndTVStandardNone,
@@ -2783,12 +2813,15 @@ typedef enum _tmbslFrontEndTVStandard_t
     tmbslFrontEndTVStandardLp,
     tmbslFrontEndTVStandardMax
 } tmbslFrontEndTVStandard_t;
+#endif
  
 
 /******************************************************************************/
 /** \brief "Function pointers to hardware access services"
  *
  ******************************************************************************/
+#ifndef _tmbslFrontEndIoFunc_t_Struct_
+#define _tmbslFrontEndIoFunc_t_Struct_
 typedef struct _tmbslFrontEndIoFunc_t
 {
     /** Read hardware function */
@@ -2796,12 +2829,15 @@ typedef struct _tmbslFrontEndIoFunc_t
     /** Write hardware register, 8bit aligned function */
     tmErrorCode_t   (*Write)(tmUnitSelect_t tUnit, UInt32 AddrSize, UInt8* pAddr, UInt32 WriteLen, UInt8* pData);
 } tmbslFrontEndIoFunc_t, *ptmbslFrontEndIoFunc_t;
+#endif
 
 
 /******************************************************************************/
 /** \brief "Function pointers to Time services"
  *
  ******************************************************************************/
+#ifndef _tmbslFrontEndTimeFunc_t_Struct_
+#define _tmbslFrontEndTimeFunc_t_Struct_
 typedef struct _tmbslFrontEndTimeFunc_t
 {
     /** Return current time value in ms */
@@ -2810,17 +2846,22 @@ typedef struct _tmbslFrontEndTimeFunc_t
      don't schedule others frontend instance */
     tmErrorCode_t   (*Wait)(tmUnitSelect_t tUnit, UInt32 tms);
 } tmbslFrontEndTimeFunc_t, *ptmbslFrontEndTimeFunc_t;
+#endif   
    
 
 /******************************************************************************/
 /** \brief "Function pointers to Debug services "
  *
  ******************************************************************************/
+#ifndef _tmbslFrontEndDebugFunc_t_Struct_
+#define _tmbslFrontEndDebugFunc_t_Struct_
 typedef struct _tmbslFrontEndDebugFunc_t
 {
     /** Print a debug message */
     tmErrorCode_t   (*Print)(UInt32 level, const char* format, ...);
 } tmbslFrontEndDebugFunc_t, *ptmbslFrontEndDebugFunc_t;
+#endif
+
 
 /* Mutex types */
 typedef void *ptmbslFrontEndMutexHandle;
@@ -2830,6 +2871,8 @@ typedef void *ptmbslFrontEndMutexHandle;
 /** \brief "Function pointers to Mutex services "
  *
  ******************************************************************************/
+#ifndef _tmbslFrontEndMutexFunc_t_Struct_
+#define _tmbslFrontEndMutexFunc_t_Struct_
 typedef struct _tmbslFrontEndMutexFunc_t
 {
     /* Initialize a mutex object */
@@ -2841,6 +2884,8 @@ typedef struct _tmbslFrontEndMutexFunc_t
     /* Release a mutex object */
     tmErrorCode_t   (*Release)(ptmbslFrontEndMutexHandle pMutexHandle);
 } tmbslFrontEndMutexFunc_t, *ptmbslFrontEndMutexFunc_t;
+#endif
+
 
 /******************************************************************************/
 /** \brief "This structure contain all the bsl driver external dependencies"
@@ -2848,6 +2893,8 @@ typedef struct _tmbslFrontEndMutexFunc_t
  *  \sa    "all bsl 'init' functions"
  *
  ******************************************************************************/
+#ifndef _tmbslFrontEndDependency_t_Struct_
+#define _tmbslFrontEndDependency_t_Struct_
 typedef struct _tmbslFrontEndDependency_t
 {
     /** Hardware access to FrontEnd */
@@ -2863,9 +2910,12 @@ typedef struct _tmbslFrontEndDependency_t
     /** Device Parameters data pointer */
     void*                       pAdditionalData;
 } tmbslFrontEndDependency_t, *ptmbslFrontEndDependency_t;
+#endif
+
 
 /*============================================================================*/
-
+#ifndef tmSWSettingsVersion_Struct_
+#define tmSWSettingsVersion_Struct_
 typedef struct tmSWSettingsVersion
 {
     UInt32      customerNr;         /* SW Settings customer number */
@@ -2874,6 +2924,8 @@ typedef struct tmSWSettingsVersion
     UInt32      minorVersionNr;     /* SW Settings minor version number */
 
 }   tmSWSettingsVersion_t, *ptmSWSettingsVersion_t;
+#endif
+
 
 /******************************************************************************/
 /** \brief "These macros map to trace functions "
@@ -3554,13 +3606,11 @@ extern "C"
 
     } tmTDA182I2Object_t, *ptmTDA182I2Object_t, **pptmTDA182I2Object_t;
 
-
 /* suppress warning about static */
 #pragma GCC diagnostic ignored "-Wunused-function"
 static tmErrorCode_t TDA182I2Init(tmUnitSelect_t tUnit);
 static tmErrorCode_t TDA182I2Wait(ptmTDA182I2Object_t pObj, UInt32 Time);
 static tmErrorCode_t TDA182I2WaitXtalCal_End( ptmTDA182I2Object_t pObj, UInt32 timeOut, UInt32 waitStep);
-
 
 extern tmErrorCode_t TDA182I2MutexAcquire(ptmTDA182I2Object_t   pObj, UInt32 timeOut);
 extern tmErrorCode_t TDA182I2MutexRelease(ptmTDA182I2Object_t   pObj);

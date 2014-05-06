@@ -155,7 +155,7 @@ enum RTL2832_E4000_TUNER_GAIN_MODE
 // Builder
 void
 BuildRtl2832E4000Module(
-	DVBT_NIM_MODULE **ppNim,							// DVB-T NIM dependence
+	DVBT_NIM_MODULE **ppNim,									// DVB-T NIM dependence
 	DVBT_NIM_MODULE *pDvbtNimModuleMemory,
 
 	unsigned long I2cReadingByteNumMax,					// Base interface dependence
@@ -186,7 +186,20 @@ rtl2832_e4000_Initialize(
 	);
 
 int
+rtl2832_e4000_Initialize_fm(
+	DVBT_NIM_MODULE *pNim
+	);
+
+
+int
 rtl2832_e4000_SetParameters(
+	DVBT_NIM_MODULE *pNim,
+	unsigned long RfFreqHz,
+	int BandwidthMode
+	);
+
+int
+rtl2832_e4000_SetParameters_fm(
 	DVBT_NIM_MODULE *pNim,
 	unsigned long RfFreqHz,
 	int BandwidthMode

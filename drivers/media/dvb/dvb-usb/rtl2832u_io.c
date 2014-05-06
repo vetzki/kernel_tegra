@@ -157,9 +157,9 @@ write_rc_char_bytes(
 		ret=1;
 	}	
 	mutex_unlock(&dib->usb_mutex);	
-	
+
 	return ret;
-	
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -342,9 +342,9 @@ read_demod_register(
 
 	
 	//	deb_info("%s[1345]: ret=%d, DA=0x%x, len=%d, page=%d, offset=0x%x, data=(", __FUNCTION__, ret, demod_device_addr, bytelength,page, offset);
-	//	for(i = 0; i < bytelength; i++)
-	//		deb_info("0x%x,", data[i]);
-	//	deb_info(")\n");
+//		for(i = 0; i < bytelength; i++)
+//			deb_info("0x%x,", data[i]);
+//		deb_info(")\n");
 			
         if (ret != bytelength)
 	{
@@ -408,10 +408,10 @@ error_write_again:
 
 	mutex_unlock(&dib->usb_mutex);
 
-	//	deb_info("%s: ret=%d, DA=0x%x, len=%d, page=%d, offset=0x%x, data=(", __FUNCTION__, ret, demod_device_addr, bytelength, page,offset);
-	//	for(i = 0; i < bytelength; i++)
-	//		deb_info("0x%x,", data[i]);
-	//	deb_info(")\n");
+//		deb_info("%s: ret=%d, DA=0x%x, len=%d, page=%d, offset=0x%x, data=(", __FUNCTION__, ret, demod_device_addr, bytelength, page,offset);
+//		for(i = 0; i < bytelength; i++)
+//			deb_info("0x%x,", data[i]);
+//		deb_info(")\n");
 
 
         if (ret != bytelength)
@@ -900,7 +900,7 @@ error:
 	return 1;
 
 }
-	
+
 
 
 

@@ -1,34 +1,31 @@
+
 #include <linux/module.h>
 #include <linux/version.h>
 
 #include "rtl2832u.h"
 #include "rtl2832u_io.h"
-#include "rtl2832u_ioctl.h"
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)) || ((defined V4L2_VERSION) && (V4L2_VERSION >= 196608))
-#define V4L2_REFACTORED_MFE_CODE
-#endif
-
+#include "rtl2832u_audio.h"
+//#include "rtl2832u_ioctl.h"
 
 int dvb_usb_rtl2832u_debug=0;
 module_param_named(debug,dvb_usb_rtl2832u_debug, int, 0644);
-MODULE_PARM_DESC(debug, "Set debugging level (0=disable, 1=info, 2=xfer, 4=rc (or-able)), default=0");
+MODULE_PARM_DESC(debug, "Set debugging level (1=info,xfer=2 (or-able),rc=3)." DVB_USB_DEBUG_STATUS);
 
 int demod_default_type=0;
 module_param_named(demod, demod_default_type, int, 0644);
-MODULE_PARM_DESC(demod, "Set default demod type (0=dvb-t, 1=dtmb, 2=dvb-c), default=0");
+MODULE_PARM_DESC(demod, "Set default demod type(0=dvb-t, 1=dtmb, 2=dvb-c)"DVB_USB_DEBUG_STATUS);
 
-int dtmb_error_packet_discard=0;
+int dtmb_error_packet_discard;
 module_param_named(dtmb_err_discard, dtmb_error_packet_discard, int, 0644);
-MODULE_PARM_DESC(dtmb_err_discard, "Set error packet discard type (0=not discard, 1=discard), default=0");
+MODULE_PARM_DESC(dtmb_err_discard, "Set error packet discard type(0=not discard, 1=discard)"DVB_USB_DEBUG_STATUS);
 
-int dvb_use_rtl2832u_rc_mode=3;
+int dvb_use_rtl2832u_rc_mode=2;
 module_param_named(rtl2832u_rc_mode, dvb_use_rtl2832u_rc_mode, int, 0644);
-MODULE_PARM_DESC(rtl2832u_rc_mode, "Set default rtl2832u_rc_mode (0=rc6, 1=rc5, 2=nec, 3=disable rc), default=3");
+MODULE_PARM_DESC(rtl2832u_rc_mode, "Set default rtl2832u_rc_mode(0=rc6, 1=rc5, 2=nec, 3=disable rc, default=2)."DVB_USB_DEBUG_STATUS);
 
 int dvb_use_rtl2832u_card_type=0;
 module_param_named(rtl2832u_card_type, dvb_use_rtl2832u_card_type, int, 0644);
-MODULE_PARM_DESC(rtl2832u_card_type, "Set default rtl2832u_card_type type (0=dongle, 1=mini card), default=0");
+MODULE_PARM_DESC(rtl2832u_card_type, "Set default rtl2832u_card_type type(0=dongle, 1=mini card, default=0)."DVB_USB_DEBUG_STATUS);
 
 int dvb_usb_rtl2832u_snrdb=0;
 module_param_named(snrdb,dvb_usb_rtl2832u_snrdb, int, 0644);
@@ -40,7 +37,9 @@ MODULE_PARM_DESC(snrdb, "SNR type output (0=16bit, 1=dB decibel), default=0");
 //#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 //#endif
-	
+
+#define	USB_EPA_CTL	0x0148
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define RT_RC_POLLING_INTERVAL_TIME_MS			287
@@ -48,7 +47,7 @@ DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
 /* original realtek remote control key map */
 /*
-static struct rc_map_table rtl2832u_rc_keys_map_table[] = {  	
+static struct dvb_usb_rc_key rtl2832u_rc_keys_map_table[] = {// realtek Key map   	
 		{ 0x0400, KEY_0 },           // 0 
 		{ 0x0401, KEY_1 },           // 1 
 		{ 0x0402, KEY_2 },           // 2 
@@ -533,7 +532,7 @@ static int rtl2832u_rc_query(struct dvb_usb_device *d, u32 *event, int *state)
 	};
 
 
-	u8  data=0,i=0,byte_count=0,tableSize;
+	u8  data=0,i=0,byte_count=0;
 	int ret=0;
 	u8  rt_u8_code[rt_code_len];
 	u8  ucode[4];
@@ -610,38 +609,33 @@ static int rtl2832u_rc_query(struct dvb_usb_device *d, u32 *event, int *state)
 			else if (dvb_use_rtl2832u_rc_mode== 2)		ret =frt2(rt_u8_code,byte_count,ucode);	
 			else  
 			{
-					deb_rc("%s : rc - unknow rc protocol set ! \n", __FUNCTION__);
+					//deb_rc("%s : rc - unknow rc protocol set ! \n", __FUNCTION__);
 					ret=-1;
 					goto error;	
 			}
 			
 			if((ret != RC_FUNCTION_SUCCESS) || (ucode[0] ==0 && ucode[1] ==0 && ucode[2] ==0 && ucode[3] ==0))   
  			{
-					deb_rc("%s : rc-rc is error scan code ! %x %x %x %x \n", __FUNCTION__,ucode[0],ucode[1],ucode[2],ucode[3]);
+					//deb_rc("%s : rc-rc is error scan code ! %x %x %x %x \n", __FUNCTION__,ucode[0],ucode[1],ucode[2],ucode[3]);
 					ret=-1;
 					goto error;	
 			}
 			scancode=(ucode[2]<<8) | ucode[3] ;
 			deb_info("-%s scan code %x %x %x %x,(0x%x) -- len=%d\n", __FUNCTION__,ucode[0],ucode[1],ucode[2],ucode[3],scancode,byte_count);
 			////////// map/////////////////////////////////////////////////////////////////////////////////////////////////////
-			tableSize = ARRAY_SIZE(rtl2832u_rc_keys_map_table);
-			for (i = 0; i < tableSize; i++) {
+			for (i = 0; i < ARRAY_SIZE(rtl2832u_rc_keys_map_table); i++) {
 				if(rtl2832u_rc_keys_map_table[i].scancode == scancode ){
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 					*event = rtl2832u_rc_keys_map_table[i].keycode;
 #else
 					*event = rtl2832u_rc_keys_map_table[i].event;
-#endif	
-
+#endif
 					*state = REMOTE_KEY_PRESSED;
 					deb_rc("%s : map number = %d \n", __FUNCTION__,i);	
 					break;
 				}		
 				
 			}
-			if (i == tableSize)
-				deb_rc("%s : rc - scancode 0x%x NOT found!\n", __FUNCTION__, scancode);
-		
 
 			memset(rt_u8_code,0,rt_code_len);
 			byte_count=0;
@@ -699,13 +693,11 @@ error:
 
 static int rtl2832u_frontend_attach(struct dvb_usb_adapter *adap)
 {
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-          adap->fe_adap[0].fe = rtl2832u_fe_attach(adap->dev);
+	adap->fe_adap[0].fe = rtl2832u_fe_attach(adap->dev);
 #else
-          adap->fe = rtl2832u_fe_attach(adap->dev);
+	adap->fe = rtl2832u_fe_attach(adap->dev);
 #endif
-
 	return 0;
 }
 
@@ -821,7 +813,6 @@ static struct usb_device_id rtl2832u_usb_table [] = {
 
 	{ USB_DEVICE(USB_VID_LEADTEK, USB_PID_LEADTEK_WARM_1)},		// 60			
 	{ USB_DEVICE(USB_VID_LEADTEK, USB_PID_LEADTEK_WARM_2)},		// 61
-	{ USB_DEVICE(USB_VID_LEADTEK, USB_PID_LEADTEK_WARM_3)},		
 
 	{ USB_DEVICE(USB_VID_YUAN, USB_PID_YUAN_WARM)},			//62
         { USB_DEVICE(USB_VID_YUAN, USB_PID_YUAN_WARM80)},		//63
@@ -836,15 +827,16 @@ static struct usb_device_id rtl2832u_usb_table [] = {
 	{ USB_DEVICE(USB_VID_COMPRO, USB_PID_COMPRO_WARM_9550)},	// 71			
 	{ USB_DEVICE(USB_VID_COMPRO, USB_PID_COMPRO_WARM_9540)},	// 72			
 	{ USB_DEVICE(USB_VID_COMPRO, USB_PID_COMPRO_WARM_9530)},	// 73  71																						//------rtl2832u_6th_properties(6)
-	{ USB_DEVICE(USB_VID_COMPRO, USB_PID_COMPRO_WARM_9520)},	// 74
-	
-	{ USB_DEVICE(USB_VID_GOLDENBRIDGE, USB_PID_GOLDENBRIDGE_WARM)},	//75	
+	{ USB_DEVICE(USB_VID_COMPRO,  USB_PID_COMPRO_WARM_9520)},	// 74
+		
+	{ USB_DEVICE(USB_VID_GOLDENBRIDGE, USB_PID_GOLDENBRIDGE_WARM)},	//75
 
-	{ USB_DEVICE(USB_VID_TERRATEC, USB_PID_TERRATEC_00D3)},     // 76 // tmtmtm Terratec Cinergy T
-	{ USB_DEVICE(USB_VID_TERRATEC, USB_PID_TERRATEC_00E0)},     // 77 // tmtmtm NOXON DAB
+	{ USB_DEVICE(USB_VID_LEADTEK, USB_PID_WINFAST_DTV_DONGLE_MINI)},	// 76
 
-	{ USB_DEVICE(USB_VID_REALTEK, USB_PID_RTL2838_WARM) },		// 78 // tmtmtmRTL venomizer 
-													
+	{ USB_DEVICE(USB_VID_TERRATEC, USB_PID_TERRATEC_00D3)},		// 77
+	{ USB_DEVICE(USB_VID_TERRATEC, USB_PID_TERRATEC_00D4)},		// 78
+	{ USB_DEVICE(USB_VID_TERRATEC, USB_PID_TERRATEC_00E0)},		// 79
+
 	{ 0 },
 };
 
@@ -856,21 +848,16 @@ static struct dvb_usb_device_properties rtl2832u_1st_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -885,17 +872,15 @@ static struct dvb_usb_device_properties rtl2832u_1st_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 	
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
@@ -954,21 +939,16 @@ static struct dvb_usb_device_properties rtl2832u_2nd_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -983,27 +963,23 @@ static struct dvb_usb_device_properties rtl2832u_2nd_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
-
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
 #endif	
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-
 	
 	.num_device_descs = 9,
 	.devices = {
@@ -1054,21 +1030,16 @@ static struct dvb_usb_device_properties rtl2832u_3th_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -1083,27 +1054,25 @@ static struct dvb_usb_device_properties rtl2832u_3th_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
 #endif	
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-	
+
 	.num_device_descs = 9,
 	.devices = {
 		{ .name = "DK DONGLE",
@@ -1157,21 +1126,16 @@ static struct dvb_usb_device_properties rtl2832u_4th_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -1186,28 +1150,26 @@ static struct dvb_usb_device_properties rtl2832u_4th_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
-#endif
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+#endif	
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-	
-	.num_device_descs = 9,
+
+	.num_device_descs = 12,
 	.devices = {
 		{ .name = "DK DONGLE",
 		  .cold_ids = { NULL, NULL },
@@ -1255,7 +1217,23 @@ static struct dvb_usb_device_properties rtl2832u_4th_properties = {
 		  .warm_ids = { &rtl2832u_usb_table[35], NULL },
 		},				
 		
-		
+		{
+		  .name = "Terratec Cinergy T Stick RC (Rev.3)",
+		  .cold_ids = { NULL, NULL },
+		  .warm_ids = { &rtl2832u_usb_table[77], NULL },
+		},
+
+		{
+		  .name = "Terratec Cinergy T Stick BLACK (Rev.2)",
+		  .cold_ids = { NULL, NULL },
+		  .warm_ids = { &rtl2832u_usb_table[78], NULL },
+		},
+
+		{
+		  .name = "Terratec Noxon DAB Stick (Rev.2)",
+		  .cold_ids = { NULL, NULL },
+		  .warm_ids = { &rtl2832u_usb_table[79], NULL },
+		},
 	}
 };
 
@@ -1264,21 +1242,16 @@ static struct dvb_usb_device_properties rtl2832u_5th_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -1293,27 +1266,25 @@ static struct dvb_usb_device_properties rtl2832u_5th_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
 #endif	
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-	
+
 	.num_device_descs = 9,
 	.devices = {
 		{ .name = "RTL2832U DVB-T USB DEVICE",
@@ -1371,21 +1342,16 @@ static struct dvb_usb_device_properties rtl2832u_6th_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -1400,27 +1366,25 @@ static struct dvb_usb_device_properties rtl2832u_6th_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 
 	 /*remote control*/
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
 #endif	
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-		
+
 	.num_device_descs = 9,
 	.devices = {
 		{ .name = "USB DVB-T DEVICE",
@@ -1467,7 +1431,7 @@ static struct dvb_usb_device_properties rtl2832u_6th_properties = {
 		},
 		
 		{ NULL },				
-		
+
 		
 	}
 };
@@ -1477,21 +1441,16 @@ static struct dvb_usb_device_properties rtl2832u_7th_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -1506,28 +1465,26 @@ static struct dvb_usb_device_properties rtl2832u_7th_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
 #endif	
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-	
-	.num_device_descs = 9,
+
+	.num_device_descs = 10,
 	.devices = {
 		{ .name = "DVB-T TV Stick",
 		  .cold_ids = { NULL, NULL },
@@ -1559,16 +1516,19 @@ static struct dvb_usb_device_properties rtl2832u_7th_properties = {
 		  .warm_ids = { &rtl2832u_usb_table[60], NULL },
 		},
 		{
-		  .name ="USB DVB-T Device",
+		  .name = "USB DVB-T Device",
 		  .cold_ids = { NULL, NULL },
 		  .warm_ids = { &rtl2832u_usb_table[61], NULL },
 		},
 		{
-		  .name ="USB DVB-T Device",
+		  .name = "USB DVB-T Device",
 		  .cold_ids = { NULL, NULL },
 		  .warm_ids = { &rtl2832u_usb_table[62], NULL },
 		},
-
+		{ .name = "Leadtek WinFast DTV Dongle Mini",
+		  .cold_ids = { NULL, NULL },
+		  .warm_ids = { &rtl2832u_usb_table[76], NULL },
+		},
 		{ NULL },				
 	}
 };
@@ -1576,23 +1536,18 @@ static struct dvb_usb_device_properties rtl2832u_7th_properties = {
 static struct dvb_usb_device_properties rtl2832u_8th_properties = {
 
 	.num_adapters = 1,
-	.adapter = 
+	.adapter =
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -1607,27 +1562,25 @@ static struct dvb_usb_device_properties rtl2832u_8th_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
 #endif	
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-	
+
 	.num_device_descs = 9,
 	.devices = {
 		{ .name = "USB DVB-T Device",
@@ -1679,21 +1632,16 @@ static struct dvb_usb_device_properties rtl2832u_9th_properties = {
 	.num_adapters = 1,
 	.adapter = 
 	{
-			{
-
+		{
+#ifndef NO_FE_IOCTL_OVERRIDE
+			.fe_ioctl_override = rtl2832_fe_ioctl_override,
+#endif
 #ifdef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-                       .num_frontends = 1,
-                       .fe = {{
+			.num_frontends = 1,
+			.fe = {{
 #endif
-
-                       .streaming_ctrl = rtl2832u_streaming_ctrl,
-                       .frontend_attach = rtl2832u_frontend_attach,
-
-#ifndef V4L2_REFACTORED_MFE_CODE
-                       .fe_ioctl_override = rtl2832u_ioctl_override,
-#endif
-
+			.streaming_ctrl = rtl2832u_streaming_ctrl,
+			.frontend_attach = rtl2832u_frontend_attach,
 			//parameter for the MPEG2-data transfer 
 			.stream = 
 			{
@@ -1708,28 +1656,26 @@ static struct dvb_usb_device_properties rtl2832u_9th_properties = {
 					}
 				}
 			},
-
 #ifdef V4L2_REFACTORED_MFE_CODE
-                          }},
+			}},
 #endif
-
 		}
 	},
 
 	//remote control
 	.rc.legacy = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#ifdef V4L2_REFACTORED_RC_CODE
 		.rc_map_table = rtl2832u_rc_keys_map_table,             //user define key map
 		.rc_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table), //user define key map size	
 #else
 		.rc_key_map       = rtl2832u_rc_keys_map_table,			//user define key map
 		.rc_key_map_size  = ARRAY_SIZE(rtl2832u_rc_keys_map_table),	//user define key map size	
 #endif	
-		.rc_query     = rtl2832u_rc_query,                 //use define quary function
-		.rc_interval  = RT_RC_POLLING_INTERVAL_TIME_MS,		
+		.rc_query         = rtl2832u_rc_query,				//use define query function
+		.rc_interval      = RT_RC_POLLING_INTERVAL_TIME_MS,		
 	},
-	
-	.num_device_descs = 6,
+
+	.num_device_descs = 4,
 	.devices = {
 		{
 		  .name ="VideoMate DTV",
@@ -1749,27 +1695,10 @@ static struct dvb_usb_device_properties rtl2832u_9th_properties = {
 		  .cold_ids = { NULL, NULL },
 		  .warm_ids = { &rtl2832u_usb_table[75], NULL },
 		},
-
-        // tmtmtm
-		{ .name = "DVB-T Cinergy",
-		  .cold_ids = { NULL, NULL },
-		  .warm_ids = { &rtl2832u_usb_table[76], NULL },
-		},
-        // tmtmtm
-		{ .name = "NOXON DAB+",
-		  .cold_ids = { NULL, NULL },
-		  .warm_ids = { &rtl2832u_usb_table[77], NULL },
-		},
-
-        // tmtmtmRTL
-		{ .name = "RTL2832U DVB-T USB DEVICE",
-		  .cold_ids = { NULL, NULL },
-		  .warm_ids = { &rtl2832u_usb_table[78], NULL },
-		},
-
-		{ NULL },				
+		{ NULL },
 	}
 };
+
 
 
 
@@ -1784,7 +1713,7 @@ static struct usb_driver rtl2832u_usb_driver = {
 static int __init rtl2832u_usb_module_init(void)
 {
 	int result =0 ;
-	
+
 	deb_info("+info debug open_%s\n", __FUNCTION__);
 	if ((result = usb_register(&rtl2832u_usb_driver))) {
 		err("usb_register failed. (%d)",result);

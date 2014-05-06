@@ -104,12 +104,12 @@ dvbt_demod_default_SetRegBytes(
 	unsigned char WritingBuffer[I2C_BUFFER_LEN];
 	unsigned long WritingByteNum, WritingByteNumMax, WritingByteNumRem;
 	unsigned char RegWritingAddr;
-
+	
 
 
 	// Get base interface.
 	pBaseInterface = pDemod->pBaseInterface;
-
+	
 
 	// Get demod I2C device address.
 	pDemod->GetDeviceAddr(pDemod, &DeviceAddr);

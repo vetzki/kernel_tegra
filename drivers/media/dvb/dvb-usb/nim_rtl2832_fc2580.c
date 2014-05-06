@@ -48,7 +48,7 @@ corresponding functions, and initialize module private variables.
 */
 void
 BuildRtl2832Fc2580Module(
-	DVBT_NIM_MODULE **ppNim,							// DVB-T NIM dependence
+	DVBT_NIM_MODULE **ppNim,								// DVB-T NIM dependence
 	DVBT_NIM_MODULE *pDvbtNimModuleMemory,
 
 	unsigned long I2cReadingByteNumMax,					// Base interface dependence
@@ -139,8 +139,8 @@ BuildRtl2832Fc2580Module(
 	pNim->UpdateFunction    = dvbt_nim_default_UpdateFunction;
 
 	// Set NIM module function pointers with particular functions.
-	pNim->Initialize    = rtl2832_fc2580_Initialize;
-	pNim->SetParameters = rtl2832_fc2580_SetParameters;
+	pNim->Initialize     = rtl2832_fc2580_Initialize;
+	pNim->SetParameters  = rtl2832_fc2580_SetParameters;
 
 
 	return;

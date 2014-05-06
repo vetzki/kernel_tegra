@@ -370,7 +370,6 @@ int main(void)
 #if !defined( __MT_USERDEF_H )
 #define __MT_USERDEF_H
 
-#include <linux/types.h>
 //#include "mt_errordef.h"
 
 #if defined( __cplusplus )     
@@ -868,7 +867,7 @@ typedef enum
 typedef enum
 {
     /*  version of the API, e.g. 10302 = 1.32                               */
-    MT2063_VER,
+    MT2063_VERSION,
 
     /*  tuner address                                  set by MT2063_Open() */
     MT2063_IC_ADDR,

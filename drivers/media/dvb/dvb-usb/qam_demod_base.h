@@ -165,7 +165,11 @@ int main(void)
 
 	// Need to set tuner before demod software reset.
 	// The order to set demod and tuner is not important.
-	// Note: One can use "pDemod->SetRegBitsWithPage(pDemod, QAM_OPT_I2C_RELAY, 0x1);"
+	// Note: 1. For 8-bit register address demod, one can use
+	//          "pDemod->RegAccess.Addr8Bit.SetRegBitsWithPage(pDemod, QAM_OPT_I2C_RELAY, 0x1);"
+	//          for tuner I2C command forwarding.
+	//       2. For 16-bit register address demod, one can use
+	//          "pDemod->RegAccess.Addr16Bit.SetRegBits(pDemod, QAM_OPT_I2C_RELAY, 0x1);"
 	//       for tuner I2C command forwarding.
 
 
@@ -506,6 +510,7 @@ enum QAM_REG_BIT_NAME
 	QAM_OPT_RF_AAGC_DRIVE_CURRENT,			// for RTL2840, RTD2885 QAM only
 	QAM_OPT_IF_AAGC_DRIVE_CURRENT,			// for RTL2840, RTD2885 QAM only
 	QAM_AGC_DRIVE_LV,						// for RTL2836B DVB-C only
+	QAM_DVBC_RSSI_R,						// for RTL2836B DVB-C only
 	QAM_OPT_RF_AAGC_DRIVE,
 	QAM_OPT_IF_AAGC_DRIVE,
 	QAM_OPT_RF_AAGC_OEN,					// for RTL2840 only
@@ -584,6 +589,7 @@ enum QAM_REG_BIT_NAME
 
 
 	// MPEG TS output interface
+	QAM_OPT_MPEG_OUT_SEL,					// for RTD2648 QAM only
 	QAM_CKOUTPAR,
 	QAM_CKOUT_PWR,
 	QAM_CDIV_PH0,
@@ -2451,22 +2457,12 @@ typedef int
 /// RTD2885 QAM extra module
 typedef struct RTD2885_QAM_EXTRA_MODULE_TAG RTD2885_QAM_EXTRA_MODULE;
 
-// RTD2885 QAM extra manipulaing functions
-typedef void
-(*RTD2885_QAM_FP_GET_CONFIG_MODE)(
-	QAM_DEMOD_MODULE *pDemod,
-	int *pConfigMode
-	);
-
 // RTD2885 QAM extra module
 struct RTD2885_QAM_EXTRA_MODULE_TAG
 {
 	// Variables
 	int ConfigMode;
 	unsigned char Func1TickNum;
-
-	// Functions
-	RTD2885_QAM_FP_GET_CONFIG_MODE   GetConfigMode;
 };
 
 
@@ -2476,22 +2472,12 @@ struct RTD2885_QAM_EXTRA_MODULE_TAG
 /// RTD2840B QAM extra module
 typedef struct RTD2840B_QAM_EXTRA_MODULE_TAG RTD2840B_QAM_EXTRA_MODULE;
 
-// RTD2840B QAM extra manipulaing functions
-typedef void
-(*RTD2840B_QAM_FP_GET_CONFIG_MODE)(
-	QAM_DEMOD_MODULE *pDemod,
-	int *pConfigMode
-	);
-
 // RTD2840B QAM extra module
 struct RTD2840B_QAM_EXTRA_MODULE_TAG
 {
 	// Variables
 	int ConfigMode;
 	unsigned char Func1TickNum;
-
-	// Functions
-	RTD2840B_QAM_FP_GET_CONFIG_MODE   GetConfigMode;
 };
 
 
@@ -2501,22 +2487,12 @@ struct RTD2840B_QAM_EXTRA_MODULE_TAG
 /// RTD2932 QAM extra module alias
 typedef struct RTD2932_QAM_EXTRA_MODULE_TAG RTD2932_QAM_EXTRA_MODULE;
 
-// RTD2932 QAM extra manipulaing functions
-typedef void
-(*RTD2932_QAM_FP_GET_CONFIG_MODE)(
-	QAM_DEMOD_MODULE *pDemod,
-	int *pConfigMode
-	);
-
 // RTD2932 QAM extra module
 struct RTD2932_QAM_EXTRA_MODULE_TAG
 {
 	// Variables
 	int ConfigMode;
 	unsigned char Func1TickNum;
-
-	// Functions
-	RTD2932_QAM_FP_GET_CONFIG_MODE   GetConfigMode;
 };
 
 
@@ -2531,6 +2507,20 @@ struct RTL2820_OC_EXTRA_MODULE_TAG
 {
 	// Variables
 	unsigned char Func1TickNum;
+};
+
+
+
+
+
+/// RTD2648 QAM extra module alias
+typedef struct RTD2648_QAM_EXTRA_MODULE_TAG RTD2648_QAM_EXTRA_MODULE;
+
+// RTD2648 QAM extra module
+struct RTD2648_QAM_EXTRA_MODULE_TAG
+{
+	// Variables
+	int ConfigMode;
 };
 
 
@@ -2565,6 +2555,7 @@ struct QAM_DEMOD_MODULE_TAG
 		RTD2840B_QAM_EXTRA_MODULE Rtd2840bQam;
 		RTD2932_QAM_EXTRA_MODULE  Rtd2932Qam;
 		RTL2820_OC_EXTRA_MODULE   Rtl2820Oc;
+		RTD2648_QAM_EXTRA_MODULE  Rtd2648Qam;
 	}
 	Extra;
 

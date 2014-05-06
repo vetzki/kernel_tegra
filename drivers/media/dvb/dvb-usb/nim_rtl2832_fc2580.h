@@ -92,7 +92,7 @@ int main(void)
 // Builder
 void
 BuildRtl2832Fc2580Module(
-	DVBT_NIM_MODULE **ppNim,							// DVB-T NIM dependence
+	DVBT_NIM_MODULE **ppNim,								// DVB-T NIM dependence
 	DVBT_NIM_MODULE *pDvbtNimModuleMemory,
 
 	unsigned long I2cReadingByteNumMax,					// Base interface dependence

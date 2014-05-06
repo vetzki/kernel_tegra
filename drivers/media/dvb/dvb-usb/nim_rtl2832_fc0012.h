@@ -82,6 +82,7 @@ int main(void)
 
 
 // Definitions
+#define RTL2832_FC0012_DAB_ADDITIONAL_INIT_REG_TABLE_LEN		31
 #define RTL2832_FC0012_ADDITIONAL_INIT_REG_TABLE_LEN		29
 #define RTL2832_FC0012_LNA_UPDATE_WAIT_TIME_MS				1000
 
@@ -92,7 +93,7 @@ int main(void)
 // Builder
 void
 BuildRtl2832Fc0012Module(
-	DVBT_NIM_MODULE **ppNim,							// DVB-T NIM dependence
+	DVBT_NIM_MODULE **ppNim,									// DVB-T NIM dependence
 	DVBT_NIM_MODULE *pDvbtNimModuleMemory,
 
 	unsigned long I2cReadingByteNumMax,					// Base interface dependence
@@ -123,7 +124,19 @@ rtl2832_fc0012_Initialize(
 	);
 
 int
+rtl2832_fc0012_Initialize_fm(
+	DVBT_NIM_MODULE *pNim
+	);
+
+int
 rtl2832_fc0012_SetParameters(
+	DVBT_NIM_MODULE *pNim,
+	unsigned long RfFreqHz,
+	int BandwidthMode
+	);
+
+int
+rtl2832_fc0012_SetParameters_fm(
 	DVBT_NIM_MODULE *pNim,
 	unsigned long RfFreqHz,
 	int BandwidthMode

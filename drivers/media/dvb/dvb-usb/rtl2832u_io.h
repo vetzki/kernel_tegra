@@ -7,20 +7,9 @@
 #include "dvb-usb.h"
 
 extern int dvb_usb_rtl2832u_debug;
-extern int dvb_usb_rtl2832u_snrdb;
-
-// using PRINTK to avoid problem about CONFIG_DVB_USB_DEBUG=n into kernel
-/*
 #define deb_info(args...) dprintk(dvb_usb_rtl2832u_debug,0x01,args)
 #define deb_xfer(args...) dprintk(dvb_usb_rtl2832u_debug,0x02,args)
 #define deb_rc(args...)   dprintk(dvb_usb_rtl2832u_debug,0x03,args)
-*/
-
-#define deb_force(args...) printk(KERN_DEBUG args);
-#define deb_info(args...) if (dvb_usb_rtl2832u_debug & 1) printk(KERN_DEBUG args);
-#define deb_xfer(args...) if (dvb_usb_rtl2832u_debug & 2) printk(KERN_DEBUG args);
-#define deb_rc(args...)   if (dvb_usb_rtl2832u_debug & 4) printk(KERN_DEBUG args);
-
 #define LEN_1_BYTE					1
 #define LEN_2_BYTE					2
 #define LEN_4_BYTE					4
@@ -37,7 +26,7 @@ extern int dvb_usb_rtl2832u_snrdb;
 
 
 #define RTL2832_DEMOD_ADDR	0x20
-#define RTL2836_DEMOD_ADDR  0x3e
+#define RTL2836_DEMOD_ADDR	0x3e
 #define RTL2840_DEMOD_ADDR	0x44
 
 

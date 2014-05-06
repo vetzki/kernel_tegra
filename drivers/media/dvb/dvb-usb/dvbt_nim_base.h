@@ -744,6 +744,20 @@ struct RTL2832_E4000_EXTRA_MODULE_TAG
 
 
 
+// RTL2832 E4005 extra module
+typedef struct RTL2832_E4005_EXTRA_MODULE_TAG RTL2832_E4005_EXTRA_MODULE;
+struct RTL2832_E4005_EXTRA_MODULE_TAG
+{
+	// Extra variables
+	unsigned long TunerModeUpdateWaitTimeMax;
+	unsigned long TunerModeUpdateWaitTime;
+	unsigned char TunerGainMode;
+};
+
+
+
+
+
 // RTL2832 MT2063 extra module
 typedef struct RTL2832_MT2063_EXTRA_MODULE_TAG RTL2832_MT2063_EXTRA_MODULE;
 struct RTL2832_MT2063_EXTRA_MODULE_TAG
@@ -784,6 +798,20 @@ struct RTL2832_FC0013_EXTRA_MODULE_TAG
 
 
 
+// RTL2832 FC0013B extra module
+typedef struct RTL2832_FC0013B_EXTRA_MODULE_TAG RTL2832_FC0013B_EXTRA_MODULE;
+struct RTL2832_FC0013B_EXTRA_MODULE_TAG
+{
+	// Extra variables
+	unsigned long LnaUpdateWaitTimeMax;
+	unsigned long LnaUpdateWaitTime;
+	unsigned long RssiRCalOn;
+};
+
+
+
+
+
 /// DVB-T NIM module structure
 struct DVBT_NIM_MODULE_TAG
 {
@@ -794,9 +822,11 @@ struct DVBT_NIM_MODULE_TAG
 	{
 		RTL2832_MT2266_EXTRA_MODULE Rtl2832Mt2266;
 		RTL2832_E4000_EXTRA_MODULE  Rtl2832E4000;
+		RTL2832_E4005_EXTRA_MODULE     Rtl2832E4005;
 		RTL2832_MT2063_EXTRA_MODULE Rtl2832Mt2063;
 		RTL2832_FC0012_EXTRA_MODULE Rtl2832Fc0012;
 		RTL2832_FC0013_EXTRA_MODULE Rtl2832Fc0013;
+		RTL2832_FC0013B_EXTRA_MODULE   Rtl2832Fc0013b;
 	}
 	Extra;
 

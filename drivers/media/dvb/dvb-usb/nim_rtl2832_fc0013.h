@@ -83,6 +83,7 @@ int main(void)
 
 // Definitions
 #define RTL2832_FC0013_ADDITIONAL_INIT_REG_TABLE_LEN		29
+#define RTL2832_FC0013_DAB_ADDITIONAL_INIT_REG_TABLE_LEN		31
 #define RTL2832_FC0013_LNA_UPDATE_WAIT_TIME_MS				1000
 
 
@@ -122,8 +123,22 @@ rtl2832_fc0013_Initialize(
 	DVBT_NIM_MODULE *pNim
 	);
 
+
+int
+rtl2832_fc0013_Initialize_fm(
+	DVBT_NIM_MODULE *pNim
+	);
+
+
 int
 rtl2832_fc0013_SetParameters(
+	DVBT_NIM_MODULE *pNim,
+	unsigned long RfFreqHz,
+	int BandwidthMode
+	);
+
+int
+rtl2832_fc0013_SetParameters_fm(
 	DVBT_NIM_MODULE *pNim,
 	unsigned long RfFreqHz,
 	int BandwidthMode

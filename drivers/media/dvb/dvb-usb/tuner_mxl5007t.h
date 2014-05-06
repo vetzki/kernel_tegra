@@ -74,7 +74,7 @@ int main(void)
 
 	...
 
-	// Set MXL5007T bandwidth.
+	// Set MxL5007T bandwidth.
 	pTunerExtra->SetBandwidthMode(pTuner, MXL5007T_BANDWIDTH_6MHZ);
 
 
@@ -85,7 +85,7 @@ int main(void)
 
 	...
 
-	// Get MXL5007T bandwidth.
+	// Get MxL5007T bandwidth.
 	pTunerExtra->GetBandwidthMode(pTuner, &BandwidthMode);
 
 
@@ -147,9 +147,13 @@ int main(void)
 *       Imports and definitions for WIN32                             
 ****************************************************************************/
 //#include <windows.h>
+
+#ifndef _UINT_X_
+#define _UINT_X_ 1
 typedef unsigned char  UINT8;
 typedef unsigned short UINT16;
 typedef unsigned int   UINT32;
+#endif
 typedef char           SINT8;
 typedef short          SINT16;
 typedef int            SINT32;

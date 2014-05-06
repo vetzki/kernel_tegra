@@ -162,7 +162,11 @@ int main(void)
 
 	// Need to set tuner before demod software reset.
 	// The order to set demod and tuner is not important.
-	// Note: One can use "pDemod->SetRegBitsWithPage(pDemod, DTMB_I2CT_EN_CTRL, 0x1);"
+	// Note: 1. For 8-bit register address demod, one can use
+	//          "pDemod->RegAccess.Addr8Bit.SetRegBitsWithPage(pDemod, DTMB_I2CT_EN_CTRL, 0x1);"
+	//          for tuner I2C command forwarding.
+	//       2. For 16-bit register address demod, one can use
+	//          "pDemod->RegAccess.Addr16Bit.SetRegBits(pDemod, DTMB_I2CT_EN_CTRL, 0x1);"
 	//       for tuner I2C command forwarding.
 
 

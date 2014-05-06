@@ -12,6 +12,7 @@
 #include "nim_rtl2832_max3543.h"
 #include "nim_rtl2832_tda18272.h"
 #include "nim_rtl2832_fc0013.h"
+#include "nim_rtl2832_r820t.h"
 
 #include "nim_rtl2836_fc2580.h"
 #include "nim_rtl2836_mxl5007t.h"
@@ -21,6 +22,18 @@
 
 #include "rtl2832u_io.h"
 #include <linux/param.h>
+#include "dvb_frontend.h"
+#include <linux/version.h>
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,3,0)) || (defined V4L2_VERSION)
+/* all DVB frontend drivers now work directly with the DVBv5
+ * structure. This warrants that all drivers will be
+ * getting/setting frontend parameters on a consistent way, in
+ * order to avoid copying data from/to the DVBv3 structs
+ * without need.
+ */
+#define V4L2_ONLY_DVB_V5
+#endif
 
 #define  UPDATE_FUNC_ENABLE_2840      0
 #define  UPDATE_FUNC_ENABLE_2836      1
@@ -30,30 +43,42 @@
 #define UPDATE_PROCEDURE_PERIOD_2832       (HZ/5)  //200ms
 
 typedef enum{
-	RTL2832_TUNER_TYPE_MT2266 = 0,		
+      RTL2832_TUNER_TYPE_UNKNOWN = 0,
+	RTL2832_TUNER_TYPE_MT2266,		
 	RTL2832_TUNER_TYPE_FC2580,	
 	RTL2832_TUNER_TYPE_TUA9001,	
 	RTL2832_TUNER_TYPE_MXL5007T,
+	RTL2832_TUNER_TYPE_E4000,	
 	RTL2832_TUNER_TYPE_FC0012,
-	RTL2832_TUNER_TYPE_E4000,
+	RTL2832_TUNER_TYPE_FC0013,
 	RTL2832_TUNER_TYPE_MT2063,
 	RTL2832_TUNER_TYPE_MAX3543,
 	RTL2832_TUNER_TYPE_TDA18272,	
-	RTL2832_TUNER_TYPE_FC0013,
-	RTL2832_TUNER_TYPE_UNKNOWN,	
+	RTL2832_TUNER_TYPE_R820T,		
 }RTL2832_TUNER_TYPE;
 
+typedef enum{
+	RTK_UNKNOWN = 0,
+	RTK_VIDEO,
+	RTK_AUDIO,
+}RTL2832_WORK_TYPE;
 
 //3  state of total device 
 struct rtl2832_state {
 	struct dvb_frontend			frontend;
-	struct dvb_frontend_parameters	fep;	
+#ifndef V4L2_ONLY_DVB_V5
+	struct dvb_frontend_parameters	fep;
+#endif	
 	struct dvb_usb_device*		d;
 
 	struct mutex					i2c_repeater_mutex;
 
-       unsigned long					current_frequency;	
-	enum fe_bandwidth			current_bandwidth;		
+       unsigned long					current_frequency;
+#ifdef V4L2_ONLY_DVB_V5
+	unsigned long			current_bandwidth_hz;
+#else
+	enum fe_bandwidth			current_bandwidth;
+#endif	
 	   
 	RTL2832_TUNER_TYPE			tuner_type;
 	unsigned char					is_mt2266_nim_module_built;  //3 For close MT handle
@@ -76,6 +101,9 @@ struct rtl2832_state {
 	//3if init() is called, is_initial is true ->check it to see if need to flush work queue 
 	unsigned short				is_initial;
 	unsigned char                             is_frequency_valid;
+
+	unsigned char                             rtl2832_audio_video_mode;
+
 
 #if  UPDATE_FUNC_ENABLE_2840
 	struct delayed_work                  update2840_procedure_work;
@@ -156,7 +184,9 @@ struct rtl2832_state {
 #define FC0013_CHECK_VALUE			0xa3
 #define FC0013_STANDBY_ADDRESS	0x06
 
-
+#define R820T_BASE_ADDRESS		0x34
+#define R820T_CHECK_ADDRESS		0x00
+#define R820T_CHECK_VALUE			0x69
 
 
 struct rtl2832_reg_addr{
@@ -281,6 +311,16 @@ typedef enum {
 	RTL2836,
 	RTL2840	
 }DEMOD_TYPE;
+
+
+
+static int
+build_nim_module(
+		struct rtl2832_state*  p_state);
+
+
+int  rtl2832_hw_reset(struct rtl2832_state *p_state);
+
 
 
 

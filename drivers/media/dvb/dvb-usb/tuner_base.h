@@ -924,6 +924,26 @@ struct E4000_EXTRA_MODULE_TAG
 
 
 
+// E4005 extra module
+typedef struct E4005_EXTRA_MODULE_TAG E4005_EXTRA_MODULE;
+
+// E4005 extra module
+struct E4005_EXTRA_MODULE_TAG
+{
+	// E4005 extra variables
+	unsigned int TunerIfFreq;
+	unsigned int TunerIfMode;
+	unsigned int BandwidthHz;
+	unsigned int CrystalFreqHz;
+	unsigned int IsBandwidthHzSet;
+	unsigned int TunerGainMode;
+	unsigned int TunerCoding;
+};
+
+
+
+
+
 // DCT-70704 extra module
 typedef struct DCT70704_EXTRA_MODULE_TAG DCT70704_EXTRA_MODULE;
 struct DCT70704_EXTRA_MODULE_TAG
@@ -1229,6 +1249,83 @@ struct TDA18272_EXTRA_MODULE_TAG
 	TDA18272_FP_SET_POWER_MODE                SetPowerMode;
 	TDA18272_FP_GET_POWER_MODE                GetPowerMode;
 	TDA18272_FP_GET_IF_FREQ_HZ                GetIfFreqHz;
+};
+
+
+
+
+
+// TDA18250 extra module
+typedef struct TDA18250_EXTRA_MODULE_TAG TDA18250_EXTRA_MODULE;
+
+// TDA18250 standard bandwidth mode setting function pointer
+typedef int
+(*TDA18250_FP_SET_STANDARD_MODE)(
+	TUNER_MODULE *pTuner,
+	int StandardMode
+	);
+
+// TDA18250 standard bandwidth mode getting function pointer
+typedef int
+(*TDA18250_FP_GET_STANDARD_MODE)(
+	TUNER_MODULE *pTuner,
+	int *pStandardMode
+	);
+
+// TDA18250 power mode setting function pointer
+typedef int
+(*TDA18250_FP_SET_POWER_STATE)(
+	TUNER_MODULE *pTuner,
+	int PowerState
+	);
+
+// TDA18250 power mode getting function pointer
+typedef int
+(*TDA18250_FP_GET_POWER_STATE)(
+	TUNER_MODULE *pTuner,
+	int *pPowerState
+	);
+
+// TDA18250 IF frequency getting function pointer
+typedef int
+(*TDA18250_FP_GET_IF_FREQ_HZ)(
+	TUNER_MODULE *pTuner,
+	unsigned long *pIfFreqHz
+	);
+
+// TDA18250 PowerLevel getting function pointer
+typedef int
+(*TDA18250_FP_Get_PowerLevel)(
+	TUNER_MODULE *pTuner,
+	unsigned long *pPowerLevel
+	);
+
+// TDA18250 PowerLevel getting function pointer
+typedef int
+(*TDA18250_FP_Reset_AGC)(
+	TUNER_MODULE *pTuner
+	);
+	
+// TDA18250 extra module
+struct TDA18250_EXTRA_MODULE_TAG
+{
+	// TDA18250 extra variables
+	unsigned long CrystalFreqHz;
+	int UnitNo;
+	int IfOutputVppMode;
+	int StandardMode;
+	int IsStandardModeSet;
+	int PowerState;
+	int IsPowerStateSet;
+
+	// TDA18250 extra function pointers
+	TDA18250_FP_SET_STANDARD_MODE   	SetStandardMode;
+	TDA18250_FP_GET_STANDARD_MODE   	GetStandardMode;
+	TDA18250_FP_SET_POWER_STATE         SetPowerState;
+	TDA18250_FP_GET_POWER_STATE         GetPowerState;
+	TDA18250_FP_GET_IF_FREQ_HZ          GetIfFreqHz;
+	TDA18250_FP_Get_PowerLevel			GetPowerLevel;
+	TDA18250_FP_Reset_AGC				ResetAGC;
 };
 
 
@@ -1639,6 +1736,95 @@ struct FC0013B_EXTRA_MODULE_TAG
 
 
 
+// MR1500 extra module
+typedef struct MR1500_EXTRA_MODULE_TAG MR1500_EXTRA_MODULE;
+
+// MR1500 bandwidth mode setting function pointer
+typedef int
+(*MR1500_FP_SET_BANDWIDTH_MODE)(
+	TUNER_MODULE *pTuner,
+	int BandwidthMode
+	);
+
+// MR1500 bandwidth mode getting function pointer
+typedef int
+(*MR1500_FP_GET_BANDWIDTH_MODE)(
+	TUNER_MODULE *pTuner,
+	int *pBandwidthMode
+	);
+
+struct MR1500_EXTRA_MODULE_TAG
+{
+	// MR1500 extra data
+	unsigned long CrystalFreqHz;
+	int BandwidthMode;
+	int IsBandwidthModeSet;
+
+	// MR1500 extra function pointers
+	MR1500_FP_SET_BANDWIDTH_MODE   SetBandwidthMode;
+	MR1500_FP_GET_BANDWIDTH_MODE   GetBandwidthMode;
+};
+
+
+
+
+
+
+
+// R820T extra module
+typedef struct R820T_EXTRA_MODULE_TAG R820T_EXTRA_MODULE;
+
+
+// R820T standard mode setting function pointer
+typedef int
+(*R820T_FP_SET_STANDARD_MODE)(
+	TUNER_MODULE *pTuner,
+	int StandardMode
+	);
+
+// R820T standard mode getting function pointer
+typedef int
+(*R820T_FP_GET_STANDARD_MODE)(
+	TUNER_MODULE *pTuner,
+	int *pStandardMode
+	);
+
+// R820T standby setting function pointer
+typedef int
+(*R820T_FP_SET_STANDBY)(
+	TUNER_MODULE *pTuner,
+	int LoopThroughType
+	);
+
+
+
+
+struct R820T_EXTRA_MODULE_TAG
+{
+
+	unsigned char Rafael_Chip;
+
+	// R820T extra variables
+	unsigned long IfFreqHz;
+	int BandwidthMode;
+	int IsBandwidthModeSet;
+
+	int StandardMode;
+	int IsStandardModeSet;
+
+	unsigned long CrystalFreqkHz;	
+
+	// R820T extra function pointers
+	R820T_FP_SET_STANDARD_MODE   SetStandardMode;
+	R820T_FP_GET_STANDARD_MODE   GetStandardMode;
+	
+	R820T_FP_SET_STANDBY   SetStandby;
+	
+};
+
+
+
+
 /// Tuner module structure
 struct TUNER_MODULE_TAG
 {
@@ -1667,6 +1853,7 @@ struct TUNER_MODULE_TAG
 		VA1T1ED6093_EXTRA_MODULE Va1t1ed6093;
 		TUA8010_EXTRA_MODULE     Tua8010;
 		E4000_EXTRA_MODULE       E4000;
+		E4005_EXTRA_MODULE       E4005;
 		DCT70704_EXTRA_MODULE    Dct70704;
 		MT2063_EXTRA_MODULE      Mt2063;
 		FC0012_EXTRA_MODULE      Fc0012;
@@ -1674,6 +1861,7 @@ struct TUNER_MODULE_TAG
 		ADMTV804_EXTRA_MODULE    Admtv804;
 		MAX3543_EXTRA_MODULE     Max3543;
 		TDA18272_EXTRA_MODULE    Tda18272;
+		TDA18250_EXTRA_MODULE    Tda18250;
 		FC0013_EXTRA_MODULE      Fc0013;
 		VA1E1ED2403_EXTRA_MODULE Va1e1ed2403;
 		AVALON_EXTRA_MODULE      Avalon;
@@ -1688,6 +1876,8 @@ struct TUNER_MODULE_TAG
 		GTLP10_EXTRA_MODULE      Gtlp10;
 		JSS66T_EXTRA_MODULE      Jss66t;
 		FC0013B_EXTRA_MODULE     Fc0013b;
+		MR1500_EXTRA_MODULE      Mr1500;
+		R820T_EXTRA_MODULE       R820t;
 	}
 	Extra;
 

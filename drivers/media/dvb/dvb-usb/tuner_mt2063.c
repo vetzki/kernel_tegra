@@ -1180,7 +1180,7 @@ UData_t MT_TunerGain(Handle_t hUserData,
 #define MT_NULL			0
 
 /*  Version of this module                          */
-#define MT2063_VERSION 10304             /*  Version 01.34 */
+#define MT2063_MODULE_VERSION 10304             /*  Version 01.34 */
 
 
 /*
@@ -1674,7 +1674,7 @@ UData_t MT2063_GetLocked(Handle_t h)
 **
 **                  param                     Description
 **                  ----------------------    --------------------------------
-**                  MT2063_VER		          Version of the API
+**                  MT2063_VERSION            Version of the API
 **                  MT2063_IC_ADDR            Serial Bus address of this tuner
 **                  MT2063_IC_REV             Tuner revision code
 **                  MT2063_MAX_OPEN           Max # of MT2063's allowed open
@@ -1785,7 +1785,7 @@ UData_t MT2063_GetParam(Handle_t     h,
         switch (param)
         {
         /*  version of the API, e.g. 10302 = 1.32 */
-        case MT2063_VER:
+        case MT2063_VERSION:
             *pValue = pInfo->version;
             break;
 
@@ -2690,7 +2690,7 @@ UData_t MT2063_ReInit(Handle_t h)
     if (MT_NO_ERROR(status))
     {
         /*  Initialize the tuner state.  */
-        pInfo->version = MT2063_VERSION;
+        pInfo->version = MT2063_MODULE_VERSION;
         pInfo->tuner_id = rev;
         pInfo->AS_Data.f_ref = REF_FREQ;
         pInfo->AS_Data.f_if1_Center = (pInfo->AS_Data.f_ref / 8) * ((UData_t) pInfo->reg[FIFFC] + 640);
@@ -3348,7 +3348,7 @@ UData_t MT2063_SetParam(Handle_t     h,
             break;
 
         /*  These parameters are read-only  */
-        case MT2063_VER:
+        case MT2063_VERSION:
         case MT2063_IC_ADDR:
         case MT2063_IC_REV:
         case MT2063_MAX_OPEN:
@@ -5155,7 +5155,6 @@ static UData_t IsSpurInBand(MT2063_AvoidSpursData_t* pAS_Info,
 **   096   04-06-2005    DAD    Ver 1.11: Fix divide by 0 error if maxH==0.
 **
 *****************************************************************************/
-#pragma GCC diagnostic ignored "-Wunused-value"
 UData_t MT2063_AvoidSpurs(Handle_t h,
                       MT2063_AvoidSpursData_t* pAS_Info)
 {
@@ -5163,9 +5162,7 @@ UData_t MT2063_AvoidSpurs(Handle_t h,
     UData_t fm, fp;                     /*  restricted range on LO's        */
     pAS_Info->bSpurAvoided = 0;
     pAS_Info->nSpursFound = 0;
-    h;                          /*  compiler warning expected: "code has no effect"    */
-								/* warning disable, see #pragma above */
-								/*       don't change (i.e. remark h) */
+    //h;                          /*  warning expected: code has no effect    */
 
     if (pAS_Info->maxH1 == 0)
         return MT_OK;

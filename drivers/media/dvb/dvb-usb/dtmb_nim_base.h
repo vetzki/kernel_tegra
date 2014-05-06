@@ -769,6 +769,20 @@ struct RTL2836B_DTMB_E4000_EXTRA_MODULE_TAG
 
 
 
+// RTL2836B DTMB E4005 extra module
+typedef struct RTL2836B_DTMB_E4005_EXTRA_MODULE_TAG RTL2836B_DTMB_E4005_EXTRA_MODULE;
+struct RTL2836B_DTMB_E4005_EXTRA_MODULE_TAG
+{
+	// Extra variables
+	unsigned long TunerModeUpdateWaitTimeMax;
+	unsigned long TunerModeUpdateWaitTime;
+	unsigned char TunerGainMode;
+};
+
+
+
+
+
 // RTL2836B DTMB FC0012 extra module
 typedef struct RTL2836B_DTMB_FC0012_EXTRA_MODULE_TAG RTL2836B_DTMB_FC0012_EXTRA_MODULE;
 struct RTL2836B_DTMB_FC0012_EXTRA_MODULE_TAG
@@ -791,6 +805,7 @@ struct RTL2836B_DTMB_FC0013B_EXTRA_MODULE_TAG
 	unsigned long LnaUpdateWaitTimeMax;
 	unsigned long LnaUpdateWaitTime;
 	unsigned long RssiRCalOn;
+	unsigned char LowGainTestMode;
 };
 
 
@@ -807,6 +822,7 @@ struct DTMB_NIM_MODULE_TAG
 	{
 		RTL2836_E4000_EXTRA_MODULE        Rtl2836E4000;
 		RTL2836B_DTMB_E4000_EXTRA_MODULE  Rtl2836bDtmbE4000;
+		RTL2836B_DTMB_E4005_EXTRA_MODULE  Rtl2836bDtmbE4005;
 		RTL2836B_DTMB_FC0012_EXTRA_MODULE Rtl2836bDtmbFc0012;
 		RTL2836B_DTMB_FC0013B_EXTRA_MODULE Rtl2836bDtmbFc0013b;
 	}

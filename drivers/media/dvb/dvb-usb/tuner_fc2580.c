@@ -61,7 +61,7 @@ BuildFc2580Module(
 
 	// Set base interface module pointer and I2C bridge module pointer.
 	pTuner->pBaseInterface = pBaseInterfaceModuleMemory;
-	pTuner->pI2cBridge = pI2cBridgeModuleMemory;
+	pTuner->pI2cBridge     = pI2cBridgeModuleMemory;
 
 	// Get tuner extra module.
 	pExtra = &(pTuner->Extra.Fc2580);
