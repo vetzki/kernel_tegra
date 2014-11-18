@@ -19,14 +19,14 @@ export SUBARCH=arm
 
 read -p '.config neu? (D = default / O = eigene: ' ANSWER
 	case $ANSWER in
-		d*|D*) 
-		make tegra_android_defconfig
+		d*|D*)
+		make tegra3_android_defconfig
 		;;
-		  o*|O*) 
-		  make tegra_android_defconfig
+		  o*|O*)
+		  make mv_grouper_defconfig
 		  ;;
-			*) 
-			echo "Ok. dann nicht" 
+			*)
+			echo "Ok. dann nicht"
 			;;
 	esac
 
