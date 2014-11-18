@@ -39,5 +39,5 @@ echo
 DIFF=$(($DATE_END - $DATE_START))
 echo "Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds."
 
-#echo "Kopiere Module...."
-#find . -name '*.ko' -print|xargs cp -vft /home/mv/Datengrab/android/Projekt/n7/kernel/Modules_tegra
+echo "Kopiere Module...."
+find . -name '*.ko' -print|xargs cp -vft /home/mv/Datengrab/android/Projekt/n7/kernel/Modules_tegra
