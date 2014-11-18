@@ -58,8 +58,6 @@ static struct audioformat *find_format(struct snd_usb_substream *subs, unsigned 
 	struct list_head *p;
 	struct audioformat *found = NULL;
 	int cur_attr = 0, attr;
-	// tmtmtm
-    printk("##### pcm.c find_format format=%#x, rate=%d, channels=%d\n", format, rate, channels);
 
 	list_for_each(p, &subs->fmt_list) {
 		struct audioformat *fp;
@@ -197,8 +195,6 @@ static int set_format(struct snd_usb_substream *subs, struct audioformat *fmt)
 	int is_playback = subs->direction == SNDRV_PCM_STREAM_PLAYBACK;
 	int err;
 
-	// tmtmtm
-    printk("##### pcm.c set_format\n");
 
 	iface = usb_ifnum_to_if(dev, fmt->iface);
 	if (WARN_ON(!iface))
@@ -343,8 +339,6 @@ static int snd_usb_hw_params(struct snd_pcm_substream *substream,
 	rate = params_rate(hw_params);
 	channels = params_channels(hw_params);
 	fmt = find_format(subs, format, rate, channels);
-	// tmtmtm
-    printk("##### pcm.c snd_usb_hw_params format=%#x, rate=%d, channels=%d\n", format, rate, channels);
 	if (!fmt) {
 		snd_printd(KERN_DEBUG "cannot set format: format = %#x, rate = %d, channels = %d\n",
 			   format, rate, channels);
@@ -455,8 +449,6 @@ static int hw_check_valid_format(struct snd_usb_substream *subs,
 	struct snd_mask check_fmts;
 	unsigned int ptime;
 
-	// tmtmtm
-    printk("##### pcm.c hw_check_valid_format\n");
 
 	/* check the format */
 	snd_mask_none(&check_fmts);
