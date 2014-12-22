@@ -7,7 +7,7 @@ UpdateZipOrdner="/home/mv/Datengrab/android/Nexus7/Projekt/anykernel_updateZip/t
 CurDir=$(pwd)
 
 cp -vft $UpdateZipOrdner/kernel arch/arm/boot/zImage
-cp -vft $UpdateZipOrdner/modules/ $ModulZipFile/easycap.ko
+cp -vft $UpdateZipOrdner/modules/ $ModulZipFile/*.ko
 
 # $ModulZipFile/bcmdhd.ko $ModulZipFile/bfq-iosched.ko $ModulZipFile/cpufreq_ondemand.ko $ModulZipFile/deadline-iosched.ko $ModulZipFile/easycap.ko $ModulZipFile/row-iosched.ko
 
