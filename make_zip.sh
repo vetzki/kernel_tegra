@@ -2,7 +2,7 @@
 
 #unalias cp
 
-ModulZipFile="/home/mv/Datengrab/android/Projekt/n7/kernel/Modules_tegra"
+ModulZipFile="/home/mv/Datengrab/android/Projekt/AOSP-L/vendor/mv/prebuilt/modules_tegra"
 UpdateZipOrdner="/home/mv/Datengrab/android/Nexus7/Projekt/anykernel_updateZip/tmp"
 CurDir=$(pwd)
 
