@@ -355,7 +355,7 @@ static int smb347_configure_otg(struct i2c_client *client, int enableOTG, int ch
 
 	if(stopChargeSlaves) {
 		if(lastChargeSlaveDevicesState) {
-			//printk("smb347_configure_otg stop charging slaves\n");
+			printk("smb347_configure_otg stop charging slaves\n");
 			/* Configure INOK to be active low */
 			ret = smb347_read(client, smb347_SYSOK_USB3);
 			if (ret < 0) {

@@ -1,9 +1,9 @@
 #include <linux/kobject.h>
 #include <linux/sysfs.h>
 
-// TODO: need to persist all 3 values 
+// TODO: need to persist all 3 values
 
-int usbhost_fixed_install_mode = 0;
+int usbhost_fixed_install_mode;
 
 static ssize_t fixed_install_mode_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
@@ -21,7 +21,7 @@ static struct kobj_attribute fixed_install_mode_attribute =
 
 
 
-int usbhost_hotplug_on_boot = 0;
+int usbhost_hotplug_on_boot;
 
 static ssize_t hotplug_on_boot_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
@@ -39,7 +39,7 @@ static struct kobj_attribute hotplug_on_boot_attribute =
 
 
 
-int usbhost_fastcharge_in_host_mode = 0;
+int usbhost_fastcharge_in_host_mode;
 
 static ssize_t fastcharge_in_host_mode_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
@@ -74,7 +74,8 @@ int usbhost_init(void)
 {
 	int retval;
 
-	usbhost_fixed_install_mode = 1;
+        //default values
+	usbhost_fixed_install_mode = 0;
 	usbhost_hotplug_on_boot = 0;
 	usbhost_fastcharge_in_host_mode = 0;
 
